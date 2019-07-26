@@ -2,7 +2,7 @@ package info.spadger.datastructures.trie
 
 class Node (val value : Char){
 
-    val children = arrayOfNulls<Node>(28)
+    val children = HashMap<Char, Node>()
 
     fun add(value : String) {
         if(value.isNotEmpty()) {
@@ -15,23 +15,13 @@ class Node (val value : Char){
     }
 
     fun getBucket(value : Char) : Node {
-        val index = getBucketIndex(value)
-
-        var bucket = children[index];
+        var bucket = children[value];
 
         if(bucket == null) {
             bucket = Node(value)
-            children[index] = bucket
+            children[value] = bucket
         }
         return bucket
-    }
-
-    fun getBucketIndex(value: Char) : Int {
-        return when(value) {
-            ' ' -> 26
-            '-' -> 27
-            else -> value - 'a'
-        }
     }
 
     fun check(value : String) : Boolean {
@@ -40,8 +30,7 @@ class Node (val value : Char){
         }
 
         val charValue = value[0]
-        val index = getBucketIndex(charValue)
-        val child = children[index] ?: return false;
+        val child = children[charValue] ?: return false;
 
         return child.check(value.substring(1))
     }
