@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.41"
+    kotlin("jvm") version "1.5.20"
 }
 
 group = "info.spadger"
@@ -13,13 +13,12 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.5.1")
-    testImplementation(kotlin("test:1.3.41"))
-
+    testImplementation("io.kotest:kotest-runner-junit5:4.6.1")
+    testImplementation("io.kotest:kotest-assertions-core:4.6.1")
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "11"
 }
 
 tasks.test {

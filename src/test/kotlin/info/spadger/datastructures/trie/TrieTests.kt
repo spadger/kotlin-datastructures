@@ -1,40 +1,35 @@
 package info.spadger.datastructures.trie
 
-import org.junit.jupiter.api.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 
-class TrieTests {
+class TrieTests : StringSpec({
 
-    @Test
-    fun `an empty trie does not report any contents`() {
+    "an empty trie does not report any contents" {
         val sut = Trie()
 
-        assertFalse(sut.check(""))
-        assertFalse(sut.check("something"))
+        sut.check("") shouldBe false
+        sut.check("something") shouldBe false
     }
 
-    @Test
-    fun `a trie does not report containing a string it does not contain`() {
+    "fun a trie does not report containing a string it does not contain" {
         val sut = Trie()
         sut.put("dog")
 
-        assertFalse(sut.check("dogs"))
+        sut.check("dogs") shouldBe false
     }
 
-    @Test
-    fun `a trie will report containing the exact string it contains`() {
+    "a trie will report containing the exact string it contains" {
         val sut = Trie()
         sut.put("dog")
 
-        assertTrue(sut.check("dog"))
+        sut.check("dog") shouldBe true
     }
 
-    @Test
-    fun `a trie will report containing a substring of a string it contains`() {
+    "a trie will report containing a substring of a string it contains" {
         val sut = Trie()
         sut.put("dogs")
 
-        assertTrue(sut.check("dog"))
+        sut.check("dog") shouldBe true
     }
-}
+})
