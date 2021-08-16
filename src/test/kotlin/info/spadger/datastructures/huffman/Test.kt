@@ -6,7 +6,6 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldExist
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldHave
 
 class Test : StringSpec({
 
@@ -14,7 +13,7 @@ class Test : StringSpec({
 
         val input = byteArrayOf(3, 0, 0, 5, 5, 5, 0, 0, 0, 1, 2, 0, 5, 5, 2, 3, 3)
 
-        val sut = HuffmanTree(input)
+        val sut = HuffmanEncoder(input)
 
         val result = sut.createInitialHistogram()
 
@@ -29,7 +28,7 @@ class Test : StringSpec({
 
     "An empty byte-array yields an empty set of codes" {
         val input = byteArrayOf()
-        val sut = HuffmanTree(input)
+        val sut = HuffmanEncoder(input)
 
         val result = sut.codes
 
@@ -38,7 +37,7 @@ class Test : StringSpec({
 
     "A byte-array with only a single specific byte yields the code 0" {
         val input = byteArrayOf(100, 100, 100, 100, 100)
-        val sut = HuffmanTree(input)
+        val sut = HuffmanEncoder(input)
 
         val result = sut.codes
 
@@ -54,7 +53,7 @@ class Test : StringSpec({
 
     "A multiple bytes yields a valid tree" {
         val input = byteArrayOf(100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 1, 2, 2)
-        val sut = HuffmanTree(input)
+        val sut = HuffmanEncoder(input)
 
         val result = sut.codes
 
@@ -85,9 +84,23 @@ class Test : StringSpec({
 
         val input = byteArrayOf(3, 0, 0, 5, 5, 5, 0, 0, 0, 1, 2, 0, 5, 5, 2, 3, 3)
 
-        val sut = HuffmanTree(input)
+        val sut = HuffmanEncoder(input)
 
-        val result = sut.state
-
+//        val result = sut.state
     }
+
+    "Pattern bytes should be written correctly" {
+        val input = listOf(
+            true,  false, true,  true,  false, false, true, true,
+            true,  false, false, false, true,  true,  true, true,
+            false, true,  true,  false,
+        )
+
+        val bytes = HuffmanEncoder(byteArrayOf()).getPatternBytes(input)
+        bytes.size shouldBe 3
+        bytes[0].toUByte() shouldBe 179.toUByte() // 10 11 00 11
+        bytes[1].toUByte() shouldBe 143.toUByte() // 10 00 11 11
+        bytes[2].toUByte() shouldBe 96.toUByte()  // 01 10 00 00 <-- 4 trialing zeros
+    }
+
 })
