@@ -2,13 +2,18 @@ package info.spadger.datastructures.huffman
 
 import java.lang.Exception
 import java.util.LinkedList
+import java.util.PriorityQueue
 
-sealed class Weighted {
+sealed class Weighted : Comparable<Weighted> {
     abstract fun weight(): Int
     abstract fun createCodes(): List<EncodedValue>
+
+    override fun compareTo(other: Weighted): Int {
+        return weight().compareTo(other.weight())
+    }
 }
 
-class MultiValue(val left: Weighted, val right: Weighted) : Weighted() {
+class MultiValue(private val left: Weighted, private val right: Weighted) : Weighted() {
     override fun weight() = left.weight() + right.weight()
 
     override fun createCodes(): List<EncodedValue> {
@@ -50,10 +55,13 @@ class EncodedValue(val value: Byte, val pattern: LinkedList<Boolean>)
 
 class HuffmanTree(private val bytes: ByteArray) {
 
-    val state = createInitialHistogram()
+    val state = PriorityQueue<Weighted>()
     val codes: List<EncodedValue>
 
     init {
+
+        val hist = createInitialHistogram()
+        state.addAll(hist)
 
         codes = if (bytes.isEmpty()) {
             emptyList()
@@ -66,11 +74,11 @@ class HuffmanTree(private val bytes: ByteArray) {
                 throw Exception("More than one state item found")
             }
 
-            state[0].createCodes()
+            state.peek().createCodes()
         }
     }
 
-    fun createInitialHistogram(): MutableList<Weighted> {
+    fun createInitialHistogram(): Collection<Weighted> {
 
         val histogram = mutableMapOf<Byte, Weighted>()
         bytes.forEach { byte ->
@@ -78,18 +86,14 @@ class HuffmanTree(private val bytes: ByteArray) {
             (singleByte as SingleValue).increment()
         }
 
-        return histogram
-            .values
-            .sortedByDescending { it.weight() }
-            .toMutableList()
+        return histogram.values
     }
 
     private fun compact() {
 
-        val right = state.removeLast()
-        val left = state.removeLast()
+        val right = state.remove()
+        val left = state.remove()
 
         state.add(MultiValue(left, right))
-        state.sortedByDescending { it.weight() }
     }
 }
