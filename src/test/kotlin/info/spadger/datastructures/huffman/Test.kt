@@ -6,6 +6,8 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldExist
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import java.io.ByteArrayOutputStream
+import java.io.DataOutputStream
 
 class Test : StringSpec({
 
@@ -67,16 +69,16 @@ class Test : StringSpec({
 
         result.shouldExist {
             it.value == 2.toByte() &&
-            it.pattern.size == 2 &&
-            it.pattern[0] == true &&
-            it.pattern[1] == false
+                    it.pattern.size == 2 &&
+                    it.pattern[0] == true &&
+                    it.pattern[1] == false
         }
 
         result.shouldExist {
             it.value == 1.toByte() &&
-            it.pattern.size == 2 &&
-            it.pattern[0] == true &&
-            it.pattern[1] == true
+                    it.pattern.size == 2 &&
+                    it.pattern[0] == true &&
+                    it.pattern[1] == true
         }
     }
 
@@ -89,11 +91,48 @@ class Test : StringSpec({
 //        val result = sut.state
     }
 
+    "Preamble should be written correctly" {
+        val codes = listOf(
+            EncodedValue(81, linkedListOf(true)),
+            EncodedValue(123, linkedListOf(false, true, true)),
+            EncodedValue(12, linkedListOf(false, true, false, true, false, true, false, true, true, true))
+        )
+
+        ByteArrayOutputStream().use { baos ->
+            DataOutputStream(baos).use { dos ->
+
+                HuffmanEncoder(ByteArray(0)).writePreamble(codes, dos)
+
+                val output = baos.toByteArray()
+
+                output.size shouldBe 12
+
+                output.map{ it.toUByte() } shouldBe ubyteArrayOf(
+                    0.toUByte(),    // First byte of total code count
+                    3.toUByte(),    // Second byte of total code count
+
+                    12.toUByte(),   // First code represents the byte value 12
+                    10.toUByte(),   // It requires 10 bits for representation
+                    0x55.toUByte(), // The first 8 bytes are 0101 0101
+                    0xC0.toUByte(), // The next 2 bytes are 11, followed by 6 bytes of padding
+
+                    81.toUByte(),   // Second code represents the byte value 81
+                    1.toUByte(),    // It requires 1 bit for representation
+                    0x80.toUByte(), // The pattern is a single bit -> 1, followed by 7 bytes of padding,
+
+                    123.toUByte(),  // Second code represents the byte value 123
+                    3.toUByte(),    // It requires 3 bits for representation
+                    0x60.toUByte(), // The pattern is 011, followed by 5 bytes of padding
+                )
+            }
+        }
+    }
+
     "Pattern bytes should be written correctly" {
         val input = listOf(
-            true,  false, true,  true,  false, false, true, true,
-            true,  false, false, false, true,  true,  true, true,
-            false, true,  true,  false,
+            true, false, true, true, false, false, true, true,
+            true, false, false, false, true, true, true, true,
+            false, true, true, false,
         )
 
         val bytes = HuffmanEncoder(byteArrayOf()).getPatternBytes(input)

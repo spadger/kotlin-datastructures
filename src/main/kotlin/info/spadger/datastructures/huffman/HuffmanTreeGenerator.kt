@@ -1,6 +1,7 @@
 package info.spadger.datastructures.huffman
 
 import java.io.ByteArrayOutputStream
+import java.io.DataOutputStream
 import java.util.LinkedList
 import java.util.PriorityQueue
 
@@ -98,23 +99,29 @@ class HuffmanEncoder(private val bytes: ByteArray) {
         return state.peek()
     }
 
-    private fun serialise(): ByteArray {
-        ByteArrayOutputStream().use {
+    fun serialise(): ByteArray {
+        ByteArrayOutputStream().use { baos ->
+            DataOutputStream(baos).use {
 
-            writePreamble(codes, it)
-            return it.toByteArray()
+                writePreamble(codes, it)
+                it.flush()
+                return baos.toByteArray()
+            }
         }
     }
 
-    fun writePreamble(codes: List<EncodedValue>, output: ByteArrayOutputStream) {
-        for (code in codes) {
+    fun writePreamble(codes: List<EncodedValue>, output: DataOutputStream) {
+
+        output.writeShort(codes.size) // The number of codes the decoder will have to iterate through before payload
+
+        for (code in codes.sortedBy { it.value }) { // sorting makes it easier to rationalise for tests
 
             //Write the byte value
             output.write(code.value.toInt()) // The method needs an int, but only takes the LSByte
 
             // Write the number of bits represented
             // Worst-case, the longest pattern length for least frequent byte is 256
-            output.write(code.pattern.size) // Will never be more than 256, so we get away with 1 byte
+            output.write(code.pattern.size) // Will never be more than 256 levels deep, so we get away with 1 byte
 
             // We will write enough bytes to represent the pattern.
             // The other side will know how long this section will be from the size-byte
@@ -141,3 +148,5 @@ class HuffmanEncoder(private val bytes: ByteArray) {
         return buffer.toByteArray()
     }
 }
+
+fun <T> linkedListOf(vararg values: T): LinkedList<T> = LinkedList(values.asList())
