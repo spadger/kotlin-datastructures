@@ -1,0 +1,55 @@
+Input:
+val input = byteArrayOf(3, 0, 0, 5, 5, 5, 0, 0, 0, 1, 2, 0, 5, 5, 2, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+Output:
+
+Calculated tree
+ / \
+0  / \
+  5 /  \
+   / \  3
+  2   1
+
+00 // higher code-count byte
+05 // 5 codes in total
+
+00 // 1st code is 0x00
+01 // its code is 1-bit long
+00 // it is 0 then padded0000000
+
+01 // 2nd code is 0x01
+04 // its code is 4-bits long
+d0 // 1101 then padded 0000
+
+02 // 3rd byte is 0x02
+04 // its code is 4-bits long
+c0 // 1100 then padded 0000
+
+03 // 4th byte is 0x03
+03 // its code is 3-bits long
+e0 // 111 then padded 00000
+
+05 // 5th byte is 0x05
+02 // its code is 2-bits long
+80 // 10 then padded 000000
+
+00 // 1st byte of uncompressed byte count
+00 // 2nd byte
+00 // 3rd byte
+31 // 4th byte = 49 uncompressed bytes
+
+/// Compressed datastream
+e5 // 1110 0101
+43 // 0100 0011
+71 // 0111 0001
+59 // 0101 1001
+f8 // 1111 1000
+00 // 0000 0000
+02 // 0000 0010
+80 // 1000 0000
+00 // 0000 0000
+
+// Below is the compressed datastream broken up into unique codes
+111 0 0 10 10 10 0 0 0 1101 1100 0 10 10 1100 111 111 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10 10 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 3  0 0  5  5  5 0 0 0    1    2 0  5  5    2   3   3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0  5  5 0 0 0 0 0 0 0 0 0 0 0 0 0 0

@@ -84,11 +84,13 @@ class Test : StringSpec({
 
     "Temp - playground" {
 
-        val input = byteArrayOf(3, 0, 0, 5, 5, 5, 0, 0, 0, 1, 2, 0, 5, 5, 2, 3, 3)
+        val input = byteArrayOf(3, 0, 0, 5, 5, 5, 0, 0, 0, 1, 2, 0, 5, 5, 2, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
         val sut = HuffmanEncoder(input)
 
-//        val result = sut.state
+        val result = sut.serialise()
+
+        val renderedB = result.toHexStringB().replace(" ", System.lineSeparator())
     }
 
     "Preamble should be written correctly" {
@@ -107,7 +109,7 @@ class Test : StringSpec({
 
                 output.size shouldBe 12
 
-                output.map{ it.toUByte() } shouldBe ubyteArrayOf(
+                output.asUByteArray() shouldBe ubyteArrayOf(
                     0.toUByte(),    // First byte of total code count
                     3.toUByte(),    // Second byte of total code count
 
@@ -143,3 +145,5 @@ class Test : StringSpec({
     }
 
 })
+
+fun UByteArray.toHexStringB(): String = joinToString(" ") { it.toString(radix = 16).padStart(2, '0') }

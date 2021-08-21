@@ -2,6 +2,7 @@ package info.spadger.datastructures.huffman
 
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
+import java.io.OutputStream
 import java.util.LinkedList
 import java.util.PriorityQueue
 
@@ -54,15 +55,15 @@ data class SingleValue(val value: Byte) : Weighted() {
 
 class EncodedValue(val value: Byte, val pattern: LinkedList<Boolean>)
 
-class HuffmanEncoder(private val bytes: ByteArray) {
+class HuffmanEncoder(private val data: ByteArray) {
 
     val codes: List<EncodedValue>
-    val serialised: ByteArray
+    val serialised: UByteArray
 
     init {
-        if (bytes.isEmpty()) {
+        if (data.isEmpty()) {
             codes = emptyList()
-            serialised = ByteArray(0)
+            serialised = UByteArray(0)
         } else {
 
             val hist = createInitialHistogram()
@@ -76,7 +77,7 @@ class HuffmanEncoder(private val bytes: ByteArray) {
     fun createInitialHistogram(): Collection<Weighted> {
 
         val histogram = mutableMapOf<Byte, Weighted>()
-        bytes.forEach { byte ->
+        data.forEach { byte ->
             val singleByte = histogram[byte] ?: SingleValue(byte).also { histogram[byte] = it }
             (singleByte as SingleValue).increment()
         }
@@ -99,13 +100,14 @@ class HuffmanEncoder(private val bytes: ByteArray) {
         return state.peek()
     }
 
-    fun serialise(): ByteArray {
+    fun serialise(): UByteArray {
         ByteArrayOutputStream().use { baos ->
             DataOutputStream(baos).use {
 
                 writePreamble(codes, it)
+                writeBody(data, codes, it)
                 it.flush()
-                return baos.toByteArray()
+                return baos.toByteArray().asUByteArray()
             }
         }
     }
@@ -133,20 +135,36 @@ class HuffmanEncoder(private val bytes: ByteArray) {
     fun getPatternBytes(pattern: List<Boolean>): ByteArray {
         val buffer = ByteArrayOutputStream()
 
-        for (chunk in pattern.chunked(8)) {
-
-            // ensure we have 8 bits, padded with 0 at the end if need be
-            val quantised = if (chunk.size == 8) chunk
-                                else chunk + (0..7 - chunk.size).map { false }
-
-            val folded = quantised.foldIndexed(0) { index, accumulator, current ->
-                if(current) accumulator + 1.rotateLeft(7-index) else accumulator
-            }
-            buffer.write(folded) // we only write a byte here, and all the code above will only work on 8 bits
-        }
+        pattern.outputWithPadding(buffer)
 
         return buffer.toByteArray()
+    }
+
+    private fun writeBody(data: ByteArray, codes: List<EncodedValue>, output: DataOutputStream) {
+
+        output.writeInt(data.size) // The last byte of the bit stream may have up to 7*0 bits for padding
+
+        val codebook = codes.associateBy({it.value}, {it.pattern.toList()})
+
+        val compressedBits = data.map { codebook[it]!! }.flatten()
+
+        compressedBits.outputWithPadding(output)
     }
 }
 
 fun <T> linkedListOf(vararg values: T): LinkedList<T> = LinkedList(values.asList())
+
+@OptIn(ExperimentalStdlibApi::class)
+fun List<Boolean>.outputWithPadding(output: OutputStream){
+    for (chunk in this.chunked(8)) {
+
+        // ensure we have 8 bits, padded with 0 at the end if need be
+        val quantised = if (chunk.size == 8) chunk
+        else chunk + (0..7 - chunk.size).map { false }
+
+        val folded = quantised.foldIndexed(0) { index, accumulator, current ->
+            if(current) accumulator + 1.rotateLeft(7-index) else accumulator
+        }
+        output.write(folded) // we only write a byte here, and all the code above will only work on 8 bits
+    }
+}
