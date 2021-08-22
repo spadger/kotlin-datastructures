@@ -6,55 +6,6 @@ import java.io.OutputStream
 import java.util.LinkedList
 import java.util.PriorityQueue
 
-sealed class Weighted : Comparable<Weighted> {
-    abstract fun weight(): Int
-    abstract fun createCodes(): List<EncodedValue>
-
-    override fun compareTo(other: Weighted): Int {
-        return weight().compareTo(other.weight())
-    }
-}
-
-class MultiValue(private val left: Weighted, private val right: Weighted) : Weighted() {
-    override fun weight() = left.weight() + right.weight()
-
-    override fun createCodes(): List<EncodedValue> {
-
-        val result = mutableListOf<EncodedValue>()
-
-        when (left) {
-            is SingleValue -> result.add(EncodedValue(left.value, LinkedList<Boolean>().also { it.push(false) }))
-            is MultiValue -> result.addAll(
-                left.createCodes().map { EncodedValue(it.value, it.pattern.also { it.push(false) }) })
-        }
-
-        when (right) {
-            is SingleValue -> result.add(EncodedValue(right.value, LinkedList<Boolean>().also { it.push(true) }))
-            is MultiValue -> result.addAll(
-                right.createCodes().map { EncodedValue(it.value, it.pattern.also { it.push(true) }) })
-        }
-
-        return result
-    }
-}
-
-data class SingleValue(val value: Byte) : Weighted() {
-
-    var count: Int = 0
-
-    fun increment() {
-        count++
-    }
-
-    override fun weight() = count
-
-    // This is a special case there is only one byte in the sequence
-    // so each byte can be represented by a single '0' bit
-    override fun createCodes() = listOf(EncodedValue(value, LinkedList<Boolean>().also { it.push(false) }))
-}
-
-class EncodedValue(val value: Byte, val pattern: LinkedList<Boolean>)
-
 class HuffmanEncoder(private val data: ByteArray) {
 
     val codes: List<EncodedValue>
@@ -168,3 +119,5 @@ fun List<Boolean>.outputWithPadding(output: OutputStream){
         output.write(folded) // we only write a byte here, and all the code above will only work on 8 bits
     }
 }
+
+class EncodedValue(val value: Byte, val pattern: LinkedList<Boolean>)
