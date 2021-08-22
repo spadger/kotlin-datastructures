@@ -34,7 +34,7 @@ class MultiValue(private val left: Weighted, private val right: Weighted) : Weig
     }
 }
 
-data class SingleValue(val value: Byte) : Weighted() {
+data class SingleValue(val value: UByte) : Weighted() {
 
     var count: Int = 0
 

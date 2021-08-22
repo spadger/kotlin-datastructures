@@ -37,7 +37,7 @@ class HuffmanDecoder(input: InputStream) {
 
     fun extractCode(input: DataInputStream, codeLengthInBits: Int): BooleanArray {
 
-        val result = BooleanArray(codeLengthInBits.toInt())
+        val result = BooleanArray(codeLengthInBits)
         val byteCount = codeLengthInBits.bitCountToByteCount()
 
         var readBits = 0
@@ -71,22 +71,14 @@ class HuffmanDecoder(input: InputStream) {
 @OptIn(ExperimentalStdlibApi::class)
 class Code(val bits: BooleanArray) {
 
-    val hashCode: Int
-
     init {
 
         if(bits.isEmpty()) {
            throw Exception("A Code must contain at least 1 bit")
         }
-
-        hashCode = bits.foldIndexed(0) { i, acc, value ->
-            if (value) {
-                acc + 1.rotateLeft(i)
-            } else acc
-        }
     }
 
-    override fun hashCode() = hashCode
+    override fun hashCode() = bits.contentHashCode()
 
     override fun equals(other: Any?) =
         when (other) {

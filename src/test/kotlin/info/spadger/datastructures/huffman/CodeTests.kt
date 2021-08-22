@@ -14,7 +14,6 @@ class CodeTests : StringSpec({
         }
 
         ex.message shouldBe "A Code must contain at least 1 bit"
-
     }
 
     "Codes with the same value should be equal" {
@@ -33,11 +32,15 @@ class CodeTests : StringSpec({
     }
 
     "A code is not equal to a different type" {
-
+        Code(booleanArrayOf(true)) shouldNotBe 1
     }
 
-    "A code's hashcode should represent its bits" {
-
+    "Two codes with the same values should share the same hash" {
+        Code(booleanArrayOf(true)).hashCode() shouldBe Code(booleanArrayOf(true)).hashCode()
+        Code(booleanArrayOf(true, false)).hashCode() shouldBe Code(booleanArrayOf(true, false)).hashCode()
+        Code(booleanArrayOf(true, true)).hashCode() shouldBe Code(booleanArrayOf(true, true)).hashCode()
+        Code(booleanArrayOf(false, false)).hashCode() shouldBe Code(booleanArrayOf(false, false)).hashCode()
+        Code(booleanArrayOf(true, false, true, false, true, false, true, false, true, false, true, false, true, false)).hashCode() shouldBe Code(booleanArrayOf(true, false, true, false, true, false, true, false, true, false, true, false, true, false)).hashCode()
     }
 
 })
