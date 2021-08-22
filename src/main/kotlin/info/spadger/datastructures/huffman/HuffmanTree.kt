@@ -3,7 +3,7 @@ package info.spadger.datastructures.huffman
 import java.util.LinkedList
 import java.util.PriorityQueue
 
-interface AHuffmanTree{
+interface AHuffmanTree {
     val codeCount: Int
     val supportedBytes: List<UByte>
     fun encode(byte: UByte): List<Boolean>
@@ -15,7 +15,7 @@ class EmptyHuffmanTree : AHuffmanTree {
     override fun encode(byte: UByte) = throw Exception("The tree had no input values, so nothing can be encoded")
 }
 
-class HuffmanTree(root: Weighted): AHuffmanTree {
+class HuffmanTree(root: Weighted) : AHuffmanTree {
 
     val codes: Map<UByte, List<Boolean>>
     override val codeCount: Int
@@ -24,7 +24,7 @@ class HuffmanTree(root: Weighted): AHuffmanTree {
     override val supportedBytes: List<UByte>
 
     init {
-        codes = root.createCodes().associateBy({it.value }, { it.pattern.toList() })
+        codes = root.createCodes().associateBy({ it.value }, { it.pattern.toList() })
         supportedBytes = codes.keys.sorted()
     }
 

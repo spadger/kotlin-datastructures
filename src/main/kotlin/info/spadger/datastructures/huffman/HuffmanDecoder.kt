@@ -2,7 +2,6 @@ package info.spadger.datastructures.huffman
 
 import java.io.DataInputStream
 import java.io.InputStream
-import java.util.Arrays
 import java.util.Dictionary
 
 class HuffmanDecoder(input: InputStream) {
@@ -10,7 +9,7 @@ class HuffmanDecoder(input: InputStream) {
     val codebook: Dictionary<Code, UByte>
     val bytes: UByteArray
 
-    init{
+    init {
 
         DataInputStream(input).use {
             codebook = createCodebook(it)
@@ -18,13 +17,13 @@ class HuffmanDecoder(input: InputStream) {
         }
     }
 
-    fun createCodebook(input: DataInputStream) : Dictionary<Code, UByte> {
+    fun createCodebook(input: DataInputStream): Dictionary<Code, UByte> {
 
         val codeBook = mutableMapOf<Code, UByte>()
 
         val totalCodes = input.readShort()
 
-        for(i in 0..totalCodes) {
+        for (i in 0..totalCodes) {
             val value = input.readByte().toUByte()
             val codeLengthInBits = input.readByte().toInt()
             val codes = extractCode(input, codeLengthInBits)
@@ -42,13 +41,13 @@ class HuffmanDecoder(input: InputStream) {
 
         var readBits = 0
 
-        for(byte in 0..byteCount) {
+        for (byte in 0..byteCount) {
 
             val currentByte = input.readByte().toUByte()
 
             for (bit in 0..7) {
                 result[readBits] = currentByte.isSet(bit)
-                if(++readBits == codeLengthInBits) {
+                if (++readBits == codeLengthInBits) {
                     return result
                 }
             }
@@ -57,7 +56,7 @@ class HuffmanDecoder(input: InputStream) {
     }
 
     @OptIn(ExperimentalStdlibApi::class)
-    fun UByte.isSet(bitNum: Int) : Boolean {
+    fun UByte.isSet(bitNum: Int): Boolean {
         val mask = 1.toUByte().rotateLeft(bitNum)
         return this and mask == mask
     }
@@ -65,7 +64,6 @@ class HuffmanDecoder(input: InputStream) {
     private fun deserialise(input: InputStream, codebook: Dictionary<Code, UByte>): UByteArray {
         TODO("Not yet implemented")
     }
-
 }
 
 @OptIn(ExperimentalStdlibApi::class)
@@ -73,8 +71,8 @@ class Code(val bits: BooleanArray) {
 
     init {
 
-        if(bits.isEmpty()) {
-           throw Exception("A Code must contain at least 1 bit")
+        if (bits.isEmpty()) {
+            throw Exception("A Code must contain at least 1 bit")
         }
     }
 

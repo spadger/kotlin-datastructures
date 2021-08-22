@@ -42,5 +42,4 @@ class CodeTests : StringSpec({
         Code(booleanArrayOf(false, false)).hashCode() shouldBe Code(booleanArrayOf(false, false)).hashCode()
         Code(booleanArrayOf(true, false, true, false, true, false, true, false, true, false, true, false, true, false)).hashCode() shouldBe Code(booleanArrayOf(true, false, true, false, true, false, true, false, true, false, true, false, true, false)).hashCode()
     }
-
 })

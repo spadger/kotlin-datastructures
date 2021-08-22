@@ -37,7 +37,7 @@ class HuffmanEncoder(data: ByteArray) {
 
         for (code in tree.supportedBytes) { // sorting makes it easier to rationalise for tests
 
-            //Write the byte value
+            // Write the byte value
             output.write(code.toInt()) // The method needs an int, but only takes the LSByte
 
             val pattern = tree.encode(code)
@@ -71,7 +71,7 @@ class HuffmanEncoder(data: ByteArray) {
 }
 
 @OptIn(ExperimentalStdlibApi::class)
-fun List<Boolean>.outputWithPadding(output: OutputStream){
+fun List<Boolean>.outputWithPadding(output: OutputStream) {
     for (chunk in this.chunked(8)) {
 
         // ensure we have 8 bits, padded with 0 at the end if need be
@@ -79,7 +79,7 @@ fun List<Boolean>.outputWithPadding(output: OutputStream){
         else chunk + (0..7 - chunk.size).map { false }
 
         val folded = quantised.foldIndexed(0) { index, accumulator, current ->
-            if(current) accumulator + 1.rotateLeft(7-index) else accumulator
+            if (current) accumulator + 1.rotateLeft(7 - index) else accumulator
         }
         output.write(folded) // we only write a byte here, and all the code above will only work on 8 bits
     }

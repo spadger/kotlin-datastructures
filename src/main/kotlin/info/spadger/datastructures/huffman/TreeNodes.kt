@@ -21,13 +21,15 @@ class MultiValue(private val left: Weighted, private val right: Weighted) : Weig
         when (left) {
             is SingleValue -> result.add(EncodedValue(left.value, LinkedList<Boolean>().also { it.push(false) }))
             is MultiValue -> result.addAll(
-                left.createCodes().map { EncodedValue(it.value, it.pattern.also { it.push(false) }) })
+                left.createCodes().map { EncodedValue(it.value, it.pattern.also { it.push(false) }) }
+            )
         }
 
         when (right) {
             is SingleValue -> result.add(EncodedValue(right.value, LinkedList<Boolean>().also { it.push(true) }))
             is MultiValue -> result.addAll(
-                right.createCodes().map { EncodedValue(it.value, it.pattern.also { it.push(true) }) })
+                right.createCodes().map { EncodedValue(it.value, it.pattern.also { it.push(true) }) }
+            )
         }
 
         return result

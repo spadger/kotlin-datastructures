@@ -1,3 +1,5 @@
+/* ktlint-disable no-multi-spaces */
+
 package info.spadger.datastructures.huffman
 
 import io.kotest.core.spec.style.StringSpec
@@ -25,7 +27,7 @@ class HuffmanEncoderTests : StringSpec({
             12.toUByte() to listOf(false, true, false, true, false, true, false, true, true, true)
         )
 
-        val tree = object: AHuffmanTree {
+        val tree = object : AHuffmanTree {
             override val codeCount: Int = 3
             override val supportedBytes = listOf(12.toUByte(), 81.toUByte(), 123.toUByte())
             override fun encode(byte: UByte): List<Boolean> = codes[byte]!!
@@ -74,7 +76,6 @@ class HuffmanEncoderTests : StringSpec({
         bytes[1].toUByte() shouldBe 143.toUByte() // 10 00 11 11
         bytes[2].toUByte() shouldBe 96.toUByte()  // 01 10 00 00 <-- 4 trialing zeros
     }
-
 })
 
 @kotlin.ExperimentalUnsignedTypes

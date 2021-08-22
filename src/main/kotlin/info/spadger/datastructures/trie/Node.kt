@@ -1,11 +1,11 @@
 package info.spadger.datastructures.trie
 
-class Node (val value : Char){
+class Node(val value: Char) {
 
     val children = HashMap<Char, Node>()
 
-    fun add(value : String) {
-        if(value.isNotEmpty()) {
+    fun add(value: String) {
+        if (value.isNotEmpty()) {
             val childNode = getBucket(value[0])
 
             if (value.length > 1) {
@@ -14,23 +14,23 @@ class Node (val value : Char){
         }
     }
 
-    fun getBucket(value : Char) : Node {
-        var bucket = children[value];
+    fun getBucket(value: Char): Node {
+        var bucket = children[value]
 
-        if(bucket == null) {
+        if (bucket == null) {
             bucket = Node(value)
             children[value] = bucket
         }
         return bucket
     }
 
-    fun check(value : String) : Boolean {
+    fun check(value: String): Boolean {
         if (value.isEmpty()) {
             return true
         }
 
         val charValue = value[0]
-        val child = children[charValue] ?: return false;
+        val child = children[charValue] ?: return false
 
         return child.check(value.substring(1))
     }
