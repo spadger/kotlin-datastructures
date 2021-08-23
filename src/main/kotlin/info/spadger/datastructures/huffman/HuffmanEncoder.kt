@@ -5,6 +5,7 @@ import java.io.DataOutputStream
 import java.io.OutputStream
 
 @kotlin.ExperimentalUnsignedTypes
+@kotlin.ExperimentalStdlibApi
 class HuffmanEncoder(data: ByteArray) {
 
     val serialised: UByteArray
@@ -14,12 +15,12 @@ class HuffmanEncoder(data: ByteArray) {
             serialised = UByteArray(0)
         } else {
 
-            val tree = HuffmanTree.fromUncompressed(data)
+            val tree = EncodingHuffmanTree.fromUncompressedData(data)
             serialised = serialise(tree, data.asUByteArray())
         }
     }
 
-    fun serialise(tree: AHuffmanTree, data: UByteArray): UByteArray {
+    fun serialise(tree: AnEncodingHuffmanTree, data: UByteArray): UByteArray {
         ByteArrayOutputStream().use { baos ->
             DataOutputStream(baos).use {
 
@@ -31,7 +32,7 @@ class HuffmanEncoder(data: ByteArray) {
         }
     }
 
-    fun writePreamble(tree: AHuffmanTree, output: DataOutputStream) {
+    fun writePreamble(tree: AnEncodingHuffmanTree, output: DataOutputStream) {
 
         output.writeShort(tree.codeCount) // The number of codes the decoder will have to iterate through before payload
 
@@ -60,7 +61,7 @@ class HuffmanEncoder(data: ByteArray) {
         return buffer.toByteArray()
     }
 
-    private fun writeBody(data: UByteArray, tree: AHuffmanTree, output: DataOutputStream) {
+    private fun writeBody(data: UByteArray, tree: AnEncodingHuffmanTree, output: DataOutputStream) {
 
         output.writeInt(data.size) // The last byte of the bit stream may have up to 7*0 bits for padding
 
@@ -70,7 +71,7 @@ class HuffmanEncoder(data: ByteArray) {
     }
 }
 
-@OptIn(ExperimentalStdlibApi::class)
+@kotlin.ExperimentalStdlibApi
 fun List<Boolean>.outputWithPadding(output: OutputStream) {
     for (chunk in this.chunked(8)) {
 

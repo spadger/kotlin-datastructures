@@ -2,41 +2,38 @@ package info.spadger.datastructures.huffman
 
 import java.io.DataInputStream
 import java.io.InputStream
-import java.util.Dictionary
+import java.io.OutputStream
+import java.util.LinkedList
 
-class HuffmanDecoder(input: InputStream) {
-
-    val codebook: Dictionary<Code, UByte>
-    val bytes: UByteArray
+@kotlin.ExperimentalUnsignedTypes
+@kotlin.ExperimentalStdlibApi
+class HuffmanDecoder(input: InputStream, output: OutputStream) {
 
     init {
 
         DataInputStream(input).use {
-            codebook = createCodebook(it)
-            bytes = deserialise(input, codebook)
+            val codebook = createCodebook(it)
+            val huffmanTree = DecodingHuffmanTree(codebook)
+            deserialise(input, huffmanTree)
         }
     }
 
-    fun createCodebook(input: DataInputStream): Dictionary<Code, UByte> {
-
-        val codeBook = mutableMapOf<Code, UByte>()
+    fun createCodebook(input: DataInputStream): List<EncodedValue> {
 
         val totalCodes = input.readShort()
 
-        for (i in 0..totalCodes) {
+        return (0..totalCodes).map {
             val value = input.readByte().toUByte()
             val codeLengthInBits = input.readByte().toInt()
-            val codes = extractCode(input, codeLengthInBits)
+            val pattern = extractPattern(input, codeLengthInBits)
 
-            codebook.put(Code(codes), value)
+            EncodedValue(value, pattern)
         }
-
-        return codebook
     }
 
-    fun extractCode(input: DataInputStream, codeLengthInBits: Int): BooleanArray {
+    fun extractPattern(input: DataInputStream, codeLengthInBits: Int): LinkedList<Boolean> {
 
-        val result = BooleanArray(codeLengthInBits)
+        val result = LinkedList<Boolean>()
         val byteCount = codeLengthInBits.bitCountToByteCount()
 
         var readBits = 0
@@ -46,7 +43,7 @@ class HuffmanDecoder(input: InputStream) {
             val currentByte = input.readByte().toUByte()
 
             for (bit in 0..7) {
-                result[readBits] = currentByte.isSet(bit)
+                result.add(currentByte.isSet(bit))
                 if (++readBits == codeLengthInBits) {
                     return result
                 }
@@ -55,34 +52,13 @@ class HuffmanDecoder(input: InputStream) {
         throw Exception("Cannot get here")
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     fun UByte.isSet(bitNum: Int): Boolean {
         val mask = 1.toUByte().rotateLeft(bitNum)
         return this and mask == mask
     }
 
-    private fun deserialise(input: InputStream, codebook: Dictionary<Code, UByte>): UByteArray {
+    private fun deserialise(input: InputStream, huffmanTree: DecodingHuffmanTree): UByteArray {
         TODO("Not yet implemented")
     }
 }
-
-@OptIn(ExperimentalStdlibApi::class)
-class Code(val bits: BooleanArray) {
-
-    init {
-
-        if (bits.isEmpty()) {
-            throw Exception("A Code must contain at least 1 bit")
-        }
-    }
-
-    override fun hashCode() = bits.contentHashCode()
-
-    override fun equals(other: Any?) =
-        when (other) {
-            is Code -> bits.contentEquals(other.bits)
-            else -> false
-        }
-}
-
 fun Int.bitCountToByteCount(): Int = ((this - 1) / 8) + 1

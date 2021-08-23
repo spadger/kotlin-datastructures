@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 
 @kotlin.ExperimentalUnsignedTypes
+@kotlin.ExperimentalStdlibApi
 class HuffmanEncoderTests : StringSpec({
     "Temp - playground" {
 
@@ -27,7 +28,7 @@ class HuffmanEncoderTests : StringSpec({
             12.toUByte() to listOf(false, true, false, true, false, true, false, true, true, true)
         )
 
-        val tree = object : AHuffmanTree {
+        val tree = object : AnEncodingHuffmanTree {
             override val codeCount: Int = 3
             override val supportedBytes = listOf(12.toUByte(), 81.toUByte(), 123.toUByte())
             override fun encode(byte: UByte): List<Boolean> = codes[byte]!!
