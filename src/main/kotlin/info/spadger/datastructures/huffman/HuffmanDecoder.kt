@@ -13,7 +13,8 @@ class HuffmanDecoder(input: InputStream, output: OutputStream) {
 
         DataInputStream(input).use {
             val codebook = createCodebook(it)
-            val huffmanTree = DecodingHuffmanTree(codebook)
+            val dataLength = it.readInt()
+            val huffmanTree = DecodingHuffmanTree(dataLength, codebook)
             deserialise(input, huffmanTree)
         }
     }
